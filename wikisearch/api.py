@@ -11,6 +11,23 @@ class WikipediaAPI:
         self.baseUrl = 'https://en.wikipedia.org/w/api.php'
         self.headers = {'User-Agent': 'Wiki-Search-VideoBot/0.1 (github.com/Orbit274/wiki-search-video)'}
 
-    def search(self, word: str):
-        params = {'action': 'query', 'list': 'search', 'srsearch': word, 'format': 'json'}
-        pass
+    def baseParams(self, word) -> dict:
+        return {'action': 'query', 'generator': 'search', 'gsrsearch': f'insource:"{word}"', 'gsrlimit': 20, 'prop': 'info', 'inprop': 'url', 'format': 'json'}
+
+    # Make an initial search, if not enough screenshots try to make another search using "continue", otherwise if no search is possible then you just end
+    # while True:
+    # r = requests.get(...params)
+    # data = r.json()
+
+    # pages = data["query"]["pages"]
+    # process(pages)
+
+    # if "continue" not in data:
+    #     break
+
+    # params.update(data["continue"])
+    def search(self, params: dict):
+        url = self.baseUrl + "?" + urllib.parse.urlencode(params)
+        request = urllib.request.Request(url, headers=self.headers)
+        with urllib.request.urlopen(request) as response:
+            return json.loads(response.read().decode())
