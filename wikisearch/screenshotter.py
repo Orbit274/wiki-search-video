@@ -63,19 +63,19 @@ class Screenshotter:
         page.add_style_tag(content = HIGHLIGHT_CSS)
         page.evaluate(SEARCH_HIGHLIGHT_JS, term)
         boxes = page.evaluate(BOUNDING_JS)
-    #     if not boxes:
-    #         return None;
+        if not boxes:
+            return None;
 
-    #     padding = 40
-    #     outputs = []
-    #     for i, box in enumerate(boxes):
-    #         clip = {
-    #             'x': max(0, box['x'] - padding),
-    #             'y': max(0, box['y'] - padding),
-    #             'width': box['width'] + padding * 2,
-    #             'height': box['height'] + padding * 2,
-    #         }
-    #         path = self.temp_dir_path / f'{term}_{i}.png'
-    #         page.screenshot(path = path, clip = clip)
-    #         outputs.append(path)
-    #     return outputs
+        padding = 40
+        outputs = []
+        for i, box in enumerate(boxes):
+            clip = {
+                'x': max(0, box['x'] - padding),
+                'y': max(0, box['y'] - padding),
+                'width': box['width'] + padding * 2,
+                'height': box['height'] + padding * 2,
+            }
+            path = self.temp_dir_path / f'{term}_{i}.png'
+            page.screenshot(path = path, clip = clip)
+            outputs.append(path)
+        return outputs
