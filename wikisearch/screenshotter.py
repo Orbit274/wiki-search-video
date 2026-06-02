@@ -16,13 +16,13 @@ SEARCH_HIGHLIGHT_JS = '''
         const treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         const regex = new RegExp(`\\\\b${term}\\\\b`, "gi");
         let node;
-        while (node = walker.nextNode()) {
+        while (node = treeWalker.nextNode()) {
             const text = node.textContent;
             if (!regex.test(text)) {
                 continue;
             }
             const span = document.createElement("span");
-            span.innerHTML = text.replace(regex, '<term class="highlight">$&</mark>');
+            span.innerHTML = text.replace(regex, '<term class="highlight">$&</term>');
             node.parentNode.replaceChild(span, node);
         }
     }
@@ -32,7 +32,7 @@ SEARCH_HIGHLIGHT_JS = '''
 # returning a js object that stores the absolute position of top left of each boudning box
 BOUNDING_JS = '''
     () => {
-        return [...document.querySelectorAll('mark.highlight')].map(highlighted => {
+        return [...document.querySelectorAll('term.highlight')].map(highlighted => {
             const rect = highlighted.getBoundingClientRect();
             return {
                 x: rect.x + window.scrollX,
@@ -49,6 +49,7 @@ class Screenshotter:
         self.width = width
         self.height = height
         self.temp_dir_path = Path(tempfile.mkdtemp())
+        self.screenshot_count = 0
 
     def process(self, json, term):
         '''Takes in a dictionary from the json file, going to find urls and then take screenshots'''
@@ -56,6 +57,24 @@ class Screenshotter:
             browser = p.chromium.launch(headless = True)
             context = browser.new_context(viewport={"width": self.width, "height": self.height})
             page = context.new_page()
+            urls = self.get_urls(json)
+            all_outputs = []
+            for url in urls:
+                if (len(all_outputs) >= MAX_SCREENSHOTS):
+                    break
+                screenshots = self.screenshot(page, url, term)
+                if screenshots:
+                    remaining = MAX_SCREENSHOTS - len(all_outputs)
+                    all_outputs.extend(screenshots[:remaining])
+        return all_outputs
+
+    def get_urls(self, json) -> list[str]:
+        pages = json['query']['pages']
+        urls = []
+        for page in pages:
+            url = page['canonicalurl']
+            urls.append(url)
+        return urls
 
     def screenshot(self, page, url, term):
         '''Goes to page, injects css for highlighting, highlights every single term, finds their bounding boxes, takes screenshots'''
@@ -66,7 +85,7 @@ class Screenshotter:
         if not boxes:
             return None;
 
-        padding = 40
+        padding = 150
         outputs = []
         for i, box in enumerate(boxes):
             clip = {
@@ -75,7 +94,8 @@ class Screenshotter:
                 'width': box['width'] + padding * 2,
                 'height': box['height'] + padding * 2,
             }
-            path = self.temp_dir_path / f'{term}_{i}.png'
+            path = self.temp_dir_path / f'{term}_{self.screenshot_count:03d}.png'
+            self.screenshot_count += 1
             page.screenshot(path = path, clip = clip)
             outputs.append(path)
         return outputs
