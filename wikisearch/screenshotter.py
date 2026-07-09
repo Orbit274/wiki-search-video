@@ -51,13 +51,13 @@ class Screenshotter:
         self.temp_dir_path = Path(tempfile.mkdtemp())
         self.screenshot_count = 0
 
-    def process(self, json, term):
+    def process(self, json: dict, term: str) -> list[Path]:
         '''Takes in a dictionary from the json file, going to find urls and then take screenshots'''
         with sync_playwright() as p:
             browser = p.chromium.launch(headless = True)
             context = browser.new_context(viewport={"width": self.width, "height": self.height})
             page = context.new_page()
-            urls = self.get_urls(json)
+            urls = self.getUrls(json)
             all_outputs = []
             for url in urls:
                 if (len(all_outputs) >= MAX_SCREENSHOTS):
@@ -68,7 +68,7 @@ class Screenshotter:
                     all_outputs.extend(screenshots[:remaining])
         return all_outputs
 
-    def get_urls(self, json) -> list[str]:
+    def getUrls(self, json: dict) -> list[str]:
         pages = json['query']['pages']
         urls = []
         for page in pages:
@@ -76,7 +76,7 @@ class Screenshotter:
             urls.append(url)
         return urls
 
-    def screenshot(self, page, url, term):
+    def screenshot(self, page: sync_playwright.Page, url: str, term: str) -> list[Path]:
         '''Goes to page, injects css for highlighting, highlights every single term, finds their bounding boxes, takes screenshots'''
         page.goto(url)
         page.add_style_tag(content = HIGHLIGHT_CSS)
