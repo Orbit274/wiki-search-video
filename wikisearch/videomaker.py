@@ -3,6 +3,7 @@ import PIL
 import random
 import imageio_ffmpeg
 import numpy
+from pathlib import Path
 
 ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
 if not ffmpeg_path:
@@ -13,7 +14,7 @@ class Editor:
         self.term = term
         self.clips = []
 
-    def spliceVideo(self, paths: list[Path]):
+    def spliceVideo(self, paths: list[Path]) -> None:
         # Take the paths, put a filter on them, create clips from moviepy, append to a clips array, may need to turn PIL obj into numpy array
         # then create a video by concatenating clips, then write video file
         for path in paths:
@@ -27,7 +28,7 @@ class Editor:
         for clip in self.clips:
             clip.close()
 
-    def imageWithFilter(self, image_path):
+    def imageWithFilter(self, image_path: Path) -> PIL.Image:
         img = PIL.Image.open(image_path).convert('RGB')
         color = random.choice(['none', 'blue', 'yellow', 'green'])
         match color:
