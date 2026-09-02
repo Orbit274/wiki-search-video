@@ -14,18 +14,22 @@ class WikipediaAPI:
     def baseParams(self, word: str) -> dict:
         return {'action': 'query', 'generator': 'search', 'gsrsearch': f'insource:"{word}"', 'gsrlimit': 20, 'prop': 'info', 'inprop': 'url', 'format': 'json', 'formatversion': 2, 'pretty': 1}
 
-    # Make an initial search, if not enough screenshots try to make another search using "continue", otherwise if no search is possible then you just end
-    # while True:
-    # data = requests.get(...params)
-
-    # pages = data['query']['pages']
-    # process(pages)
-
-    # if "continue" not in data:
-    #     break
-    # params.update(data["continue"])
-    def search(self, params: dict) -> dict:
-        url = self.baseUrl + "?" + urllib.parse.urlencode(params)
+    def request(self, params: dict) -> dict:
+        url = self.base_url + "?" + urllib.parse.urlencode(params)
         request = urllib.request.Request(url, headers=self.headers)
-        with urllib.request.urlopen(request) as response:
-            return json.loads(response.read().decode())
+
+        try:
+            with urllib.request.urlopen(request) as response:
+                data = json.loads(response.read().decode())
+        except urllib.error.HTTPError as e:
+            raise RuntimeError(f'Wikipedia has returned HTTP {e.code}') from e
+        except urllib.error.URLError as e:
+            raise RuntimeError(f'Connection failed: {e.reason}') from e
+        except json.JSONDecodeError as e:
+            raise RuntimeError('Wikipedia has invalid JSON') from e
+        except Exception as e:
+            raise RuntimeError(f'Unknown error: {e}') from e
+
+        if 'error' in data:
+            raise RuntimeError(data['error'])
+        return data
