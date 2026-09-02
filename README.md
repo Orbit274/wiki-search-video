@@ -9,16 +9,43 @@ Simple gui with tkinter, can run via terminal or vscode "run" <br>
 Simple local web page with streamlit, requires running via terminal <br>
 
 ## Usage
-Command line: <br>
-Installation <br>
+First clone the repository and navigate to the project directory
 ```bash
 cd wiki-search-video
-pip install .
+```
+It is recommended to use a virtual environment to keep the Project's dependencies isolated <br>
+Windows <br>
+```bash
+python3 -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
 playwright install chromium
 ```
-Running <br>
+Mac <br>
 ```bash
-python cli.py -- term "help"
-python gui_tkinter.py
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium
+```
+Linux <br>
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+playwright install --with-deps chromium
+```
+The terminal should then indicate that the .venv is active
+Running <br>
+Command line <br>
+```bash
+python3 cli.py --term "help"
+```
+Tkinter GUI (App) <br>
+```bash
+python3 gui_tkinter.py
+```
+Streamlit (Web app) <br>
+```bash
 streamlit run gui_streamlit.py
 ```

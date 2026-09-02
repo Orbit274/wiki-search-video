@@ -1,1 +1,0 @@
-# pip install moviepy imageio-ffmpeg pillow numpy
