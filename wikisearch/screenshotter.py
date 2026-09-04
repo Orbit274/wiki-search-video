@@ -1,5 +1,6 @@
 import tempfile
 import shutil
+import logging
 from playwright.sync_api import sync_playwright, Page
 from pathlib import Path
 from PIL import Image
@@ -105,6 +106,8 @@ CLEAR_ACTIVE_HIGHLIGHT_JS = '''
     }
 '''
 
+logger = logging.getLogger(__name__)
+
 class Screenshotter:
     def __init__(self, width = 1920, height = 1080, device_scale = 3):
         self.width = width
@@ -128,7 +131,7 @@ class Screenshotter:
                     screenshots = self.screenshot(page, url, term, MAX_SCREENSHOTS - self.screenshot_count)
                     all_outputs.extend(screenshots)
                 except Exception as e:
-                    print(f'Skipping {url}: {e}')
+                    logger.debug('Skipping %s: %s', url, e)
         return all_outputs
 
     def get_urls(self, json_dict: dict) -> list[str]:
@@ -186,9 +189,10 @@ class Screenshotter:
                 img = Image.open(path)
                 img = img.resize((self.width, self.height), Image.Resampling.LANCZOS)
                 img.save(path)
-                print(f'Screenshot {self.screenshot_count} taken at {url}')
+                logger.info('Screenshot %s/%s', self.screenshot_count + 1, MAX_SCREENSHOTS)
+                logger.debug('Screenshot %s was taken at: %s', self.screenshot_count + 1, url)
             except Exception as e:
-                print(f'Failed to take a screenshot: {e}')
+                logger.debug('Failed to take a screenshot: %s', e)
                 continue
             finally:
                 page.evaluate(CLEAR_ACTIVE_HIGHLIGHT_JS, index)
@@ -200,5 +204,5 @@ class Screenshotter:
     def remove_temporary(self) -> None:
         '''Removes temporary screenshots'''
         # Uncomment during final phases, keep commented during photo analysis/debugging
-        # shutil.rmtree(self.temp_dir_path)
+        shutil.rmtree(self.temp_dir_path)
         return

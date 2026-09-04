@@ -1,12 +1,15 @@
 import moviepy
 import random
 import numpy
+import logging
 from pathlib import Path
 from PIL import Image, ImageFilter, ImageEnhance
 from .utils import safe_filename
 
 CLIP_DURATION = .1
 FPS = 30
+
+logger = logging.getLogger(__name__)
 
 class Editor:
     def __init__(self, term):
@@ -23,9 +26,9 @@ class Editor:
                 clip = moviepy.ImageClip(frame).with_duration(CLIP_DURATION)
                 self.clips.append(clip)
             except Exception as e:
-                print(f'Skipping {path}: {e}')
+                logger.debug('Skipping %s: %s', path, e)
         if not self.clips:
-            print('No clips')
+            logger.info('No clips')
             return None
         video = moviepy.concatenate_videoclips(self.clips)
         output = Path(f'{safe_filename(self.term)}.mp4')

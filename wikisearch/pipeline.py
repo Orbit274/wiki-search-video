@@ -1,10 +1,13 @@
 import time
+import logging
 from .api import WikipediaAPI
 from .screenshotter import Screenshotter, MAX_SCREENSHOTS
 from .videomaker import Editor
 from pathlib import Path
 
 MAX_API_ATTEMPTS = 3
+
+logger = logging.getLogger(__name__)
 
 def generate_video(term: str) -> Path | None:
     api = WikipediaAPI()
@@ -20,7 +23,7 @@ def generate_video(term: str) -> Path | None:
             data = api.request(params)
         except RuntimeError as e:
             failure_count += 1
-            print(f'API request failed ({failure_count}/{MAX_API_ATTEMPTS}): {e}')
+            logger.warning('API request failed (%s/%s): %s', failure_count, MAX_API_ATTEMPTS, e)
             if failure_count >= MAX_API_ATTEMPTS:
                 raise RuntimeError(f'API request failed after {MAX_API_ATTEMPTS} attempts') from e
             time.sleep(1)
@@ -32,7 +35,7 @@ def generate_video(term: str) -> Path | None:
         if len(all_screenshots) >= MAX_SCREENSHOTS:
             break
         if 'continue' not in data:
-            print(f'No more occurrences of {term}')
+            logger.info('No more occurrences of %s', term)
             break
         params.update(data['continue'])
 
