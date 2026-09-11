@@ -42,6 +42,24 @@ STYLES_CSS = '''
     </style>
 '''
 
+class StreamlitHandler(logging.Handler):
+    def __init__(self, status, progress_placeholder, debug_container, debug_enabled):
+        super().__init__()
+        self.status = status
+        self.progress_placeholder = progress_placeholder
+        self.debug_container = debug_container
+        self.debug_enabled = debug_enabled
+
+    def emit(self, record):
+        message = self.format(record)
+        if record.levelno >= logging.INFO:
+            if getattr(record, 'progress', None):
+                self.progress_placeholder.write(message)
+            else:
+                self.status.write(message)
+        elif self.debug_enabled:
+            self.debug_container.write(message)
+
 if __name__ == '__main__':
     st.set_page_config(page_title='WikiSearch')
     st.markdown(STYLES_CSS, unsafe_allow_html=True)
@@ -78,14 +96,29 @@ if __name__ == '__main__':
         if not search_term:
             st.warning('Please enter a search term')
         else:
+            if debug:
+                debug_container = debug_placeholder.status('Debug', expanded=True)
+            else:
+                debug_container = None
+                
             with status_placeholder.container():
                 status = st.status('Generating video...', expanded=True)
-                if debug:
-                    pass
+                progress_placeholder = status.empty()
 
-                video = generate_video(search_term)
+                handler = StreamlitHandler(status, progress_placeholder, debug_container, debug)
+                logger = logging.getLogger('wikisearch')
+                logger.setLevel(logging.DEBUG)
+                logger.addHandler(handler)
+
+                try:
+                    video = generate_video(search_term)
+                finally:
+                    logger.removeHandler(handler)
                 if video is None:
                     status.write('No video generated')
+                status.update(state='complete')
+                if debug:
+                    debug_container.update(state='complete')
 
             if video is not None:
                 video_placeholder.video(video)
