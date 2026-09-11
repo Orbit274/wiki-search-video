@@ -189,7 +189,7 @@ class Screenshotter:
                 img = Image.open(path)
                 img = img.resize((self.width, self.height), Image.Resampling.LANCZOS)
                 img.save(path)
-                logger.info('Screenshot %s/%s', self.screenshot_count + 1, MAX_SCREENSHOTS)
+                logger.info('Screenshot %s/%s', self.screenshot_count + 1, MAX_SCREENSHOTS, extra={'progress': True})
                 logger.debug('Screenshot %s was taken at: %s', self.screenshot_count + 1, url)
             except Exception as e:
                 logger.debug('Failed to take a screenshot: %s', e)

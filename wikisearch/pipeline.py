@@ -44,6 +44,9 @@ def generate_video(term: str) -> Path | None:
         return None
 
     try:
+        logger.info('Creating video now')
         return editor.splice_video(all_screenshots)
+    except Exception as e:
+        logger.info('Video production error: %s', e)
     finally:
         screenshotter.remove_temporary()
