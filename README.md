@@ -29,6 +29,12 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 Linux <br>
+Tkinter may need to be installed separately from Python. On Ubuntu:
+```bash
+sudo apt update
+sudo apt install python3-tk
+```
+For other Linux distributions, install the equivalent Tkinter package with your distribution's package manager
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
