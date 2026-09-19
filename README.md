@@ -13,6 +13,7 @@ First clone the repository and navigate to the project directory
 ```bash
 cd wiki-search-video
 ```
+
 It is recommended to use a virtual environment to keep the Project's dependencies isolated <br>
 Windows <br>
 ```bash
@@ -21,7 +22,7 @@ python3 -m venv .venv
 pip install -r requirements.txt
 playwright install chromium
 ```
-Mac <br>
+macOS <br>
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -41,11 +42,26 @@ source .venv/bin/activate
 pip install -r requirements.txt
 playwright install --with-deps chromium
 ```
+
 The terminal should then indicate that the .venv is active
 Running <br>
 Command line <br>
+The cli.py file can be run with 2 optional parameters: `--term` and `--debug`<br>
+You can provide a search term directly:
 ```bash
 python3 cli.py --term "help"
+```
+You can also enable debug logging:
+```bash
+python3 cli.py --term "help" --debug
+```
+Additionally, the cli.py file can be run without any of those parameters and will have an interactive interface
+```bash
+python3 cli.py
+```
+You can also use `--debug` without providing a term:
+```bash
+python3 cli.py --debug
 ```
 Tkinter GUI (App) <br>
 ```bash
